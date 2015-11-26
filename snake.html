@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Snake</title>
+    <style>
+      body {
+        background-color: #777;
+        font-family: "Papyrus";
+      }
+      table {
+        background-color: #999;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid black;
+        text-align: center;
+        padding: 5px;
+        width: 5em;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas width="400" height="600"></canvas>
+
+    <script src="avatar.js"></script>
+
+    <script>
+    /*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\
+
+                    _..._                 .           __.....__
+                  .'     '.             .'|       .-''         '.
+                 .   .-.   .          .'  |      /     .-''"'-.  `.
+                 |  '   '  |    __   <    |     /     /________\   \
+             _   |  |   |  | .:--.'.  |   | ____|                  |
+           .' |  |  |   |  |/ |   \ | |   | \ .'\    .-------------'
+          .   | /|  |   |  |`" __ | | |   |/  .  \    '-.____...---.
+        .'.'| |//|  |   |  | .'.''| | |    /\  \  `.             .'
+    .  '.'.-'  / |  |   |  |/ /   | |_|   |  \  \   `''-...... -'
+      .'   \_.'  |  |   |  |\ \._,\ '/'    \  \  \
+        s       '--' n '--' `--'a `"'------'k'---'        e
+
+    A little HTML5 canvas demo to demonstrate the dirX/dirY-algorithm.
+
+    /*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*\/*/
+
+    // generate ascii-art: http://patorjk.com/software/taag/#p=display&f=Graffiti&t=Type%20Something%20
+    // convert ascii-art to javascript-code: http://www.howtocreate.co.uk/tutorials/jsexamples/syntax/prepareInline.html
+    var motd = "                    _..._                 .           __.....__\n                  .\'     \'.             .\'|       .-\'\'         \'.\n                 .   .-.   .          .\'  |      \/     .-\'\'\"\'-.  `.\n                 |  \'   \'  |    __   <    |     \/     \/________\\   \\\n             _   |  |   |  | .:--.\'.  |   | ____|                  |\n           .\' |  |  |   |  |\/ |   \\ | |   | \\ .\'\\    .-------------\'\n          .   | \/|  |   |  |`\" __ | | |   |\/  .  \\    \'-.____...---.\n        .\'.\'| |\/\/|  |   |  | .\'.\'\'| | |    \/\\  \\  `.             .\'\n    .  \'.\'.-\'  \/ |  |   |  |\/ \/   | |_|   |  \\  \\   `\'\'-...... -\'\n      .\'   \\_.\'  |  |   |  |\\ \\._,\\ \'\/\'    \\  \\  \\\n        s       \'--\' n \'--\' `--\'a `\"\'------\'k\'---\'        e\n\n    A little HTML5 canvas demo to demonstrate the dirX\/dirY-algorithm.";
+    // """
+
+    var help = '\nThings to try:\n\n' +
+    '- timerTick\n' +
+    '- clearInterval(t)\n' +
+    '- var t = setInterval(timerTick, 60)\n' +
+    '- avatar.draw() (you have to do this after each change, if the timer is not running)\n' +
+    '- avatar.turnLeft()\n' +
+    '- avatar.turnRight()\n' +
+    '- avatar.moveForward()\n' +
+    '- avatar.color = "green"\n' +
+    '- avatar.width = 20\n' +
+    '- canvas.style.border = "1px solid red";\n'+
+    '- avatar.x = 0\n' +
+    '- avatar.dirX = 1; avatar.dirY = 1;\n' +
+    '\nThings to try when no timer is active:\n\n' +
+    '- avatar.moveForward(); avatar.draw();\n' +
+    '- for(var i=0; i<20; i++) { avatar.moveForward(); avatar.draw(); }\n' +
+    '\n';
+
+    console.log(motd);
+    console.log(help);
+    </script>
+
+    <p><strong>Warning</strong>: This table only shows correct values after a call to <code>updateTable</code>.</p>
+
+    <table>
+      <tr>
+        <th>x</th>
+        <th>y</th>
+        <th>dirX</th>
+        <th>dirY</th>
+      </tr>
+      <tr>
+        <td id="snake_x"></td>
+        <td id="snake_y"></td>
+        <td id="snake_dirX"></td>
+        <td id="snake_dirY"></td>
+      </tr>
+    </table>
+
+    <p>
+      Open the console to control the snake!
+      <br>
+      Preferably put your console on the side of the screen.
+      <br>
+      Refresh the browser to reset all variables and objects.
+    </p>
+
+    <div>
+      <button onclick="avatar.turnLeft()">Turn Left</button>
+      <button onclick="avatar.turnRight()">Turn Right</button>
+      <button onclick="clearInterval(t)">Stop</button>
+    </div>
+
+    <script>
+      var canvas = document.getElementsByTagName("canvas")[0];
+      var ctx = canvas.getContext("2d");
+
+      // The avatar-logic is completely defined in `avatar.js`.
+      // The only part that is dependend on the canvas, we create here.
+      // You could say this is a pretty low-level method...
+      avatar.draw = function() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+
+      // We can re-assign `x` and `y` so the avatar starts in the middle of the canvas
+      avatar.x = canvas.width/2 - avatar.width/2;
+      avatar.y = canvas.height/2 - avatar.height/2;
+
+      // Let's animate our avatar with a simple interval-timer.
+      var t = window.setInterval(timerTick, 60);
+
+      function updateTable() {
+        document.getElementById("snake_x").innerText = avatar.x;
+        document.getElementById("snake_y").innerText = avatar.y;
+        document.getElementById("snake_dirX").innerText = avatar.dirX;
+        document.getElementById("snake_dirY").innerText = avatar.dirY;
+      }
+
+      function timerTick() {
+          avatar.moveForward();
+          avatar.draw();
+          updateTable();
+      }
+    </script>
+  </body>
+</html>
